@@ -1,3 +1,4 @@
+
 # Dataset trop lourd pour GitHub
 data/*.csv
 data/*.zip
@@ -14,3 +15,14 @@ venv/
 
 # VS Code
 .vscode/
+
+venv/
+data/
+.env
+__pycache__/
+*.pyc
+als_model/
+output/
+checkpoints/
+*.parquet
+
