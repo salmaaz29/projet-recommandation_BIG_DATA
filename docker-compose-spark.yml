@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════════════════════
+#  docker-compose.yml — PARTIE Personne 2 (Spark)
+#  À fusionner avec le fichier global géré par la Personne 4
+# ═══════════════════════════════════════════════════════════
+
+version: "3.8"
+
+services:
+
+  spark:
+    image: bitnami/spark:3.4
+    container_name: spark_als
+    environment:
+      - SPARK_MODE=master
+    volumes:
+      - ./data:/app/data              # données CSV
+      - ./als_model:/app/als_model    # modèle sauvegardé
+      - ./output:/app/output          # recommandations générées
+      - ./checkpoints:/app/checkpoints
+      - ./etape1_nettoyage.py:/app/etape1_nettoyage.py
+      - ./etape2_als_training.py:/app/etape2_als_training.py
+      - ./etape3_spark_streaming.py:/app/etape3_spark_streaming.py
+    ports:
+      - "8080:8080"   # UI Spark Master
+      - "7077:7077"
+    networks:
+      - bigdata_net
+
+networks:
+  bigdata_net:
+    external: true
