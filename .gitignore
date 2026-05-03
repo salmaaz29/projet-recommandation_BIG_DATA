@@ -1,0 +1,16 @@
+# Dataset trop lourd pour GitHub
+data/*.csv
+data/*.zip
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Docker
+.docker/
+
+# VS Code
+.vscode/

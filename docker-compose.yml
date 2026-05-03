@@ -1,0 +1,32 @@
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+
+    # Kafka attend que Zookeeper soit démarré avant de se lancer. Sans ça, Kafka crashe au démarrage.
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      #l'adresse que notre script Python utilisera pour se connecter à Kafka
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      
+      # On n'a qu'un seul serveur Kafka (pas un cluster), donc on met 1. En production on mettrait 3 minimum.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      
+      # Quand notre producer va envoyer des messages dans le topic reviews_stream, Kafka va créer ce topic automatiquement sans qu'on ait besoin de le faire à la main.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
