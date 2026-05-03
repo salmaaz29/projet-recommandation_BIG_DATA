@@ -6,7 +6,7 @@ Personne 2 : Data Scientist / Spark ML
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json, lit
-from pyspark.sql.types import StructType, StructField, StringType, FloatType
+from pyspark.sql.types import LongType, StructType, StructField, StringType, FloatType
 from pyspark.ml.recommendation import ALSModel
 
 # ── 1. Démarrer Spark avec le connecteur Kafka ────────────────────────
@@ -28,16 +28,17 @@ print("✅ Modèle ALS chargé depuis als_model/")
 # Format attendu depuis le Producer Kafka (Personne 1) :
 # JSON : {"user_idx": 123, "product_idx": 456, "score": 4.0}
 schema = StructType([
-    StructField("user_idx",    StringType(), True),
-    StructField("product_idx", StringType(), True),
-    StructField("score",       FloatType(),  True),
+    StructField("UserId",    StringType(), True),
+    StructField("ProductId", StringType(), True),
+    StructField("Score",     FloatType(),  True),
+    StructField("Time",      LongType(),   True),
 ])
 
 # ── 4. Lire le flux Kafka ────────────────────────────────────────────
 kafka_df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "kafka:9092") \
-    .option("subscribe", "reviews_topic") \
+    .option("subscribe", "reviews_stream") \
     .option("startingOffsets", "latest") \
     .load()
 
@@ -46,8 +47,8 @@ parsed_df = kafka_df \
     .selectExpr("CAST(value AS STRING) as json_str") \
     .select(from_json(col("json_str"), schema).alias("data")) \
     .select("data.*") \
-    .withColumn("user_idx",    col("user_idx").cast("integer")) \
-    .withColumn("product_idx", col("product_idx").cast("integer"))
+    .withColumn("user_idx",    col("UserId").cast("integer")) \
+    .withColumn("product_idx", col("ProductId").cast("integer"))
 
 # ── 6. Fonction appelée pour chaque micro-batch ──────────────────────
 def process_batch(batch_df, batch_id):
