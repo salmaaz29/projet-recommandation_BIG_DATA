@@ -3,6 +3,10 @@
 Personne 2 : Data Scientist / Spark ML
 """
 
+import os
+os.environ['PYSPARK_PYTHON'] = 'python'
+os.environ['JAVA_TOOL_OPTIONS'] = '-Djavax.security.auth.useSubjectCredsOnly=false'
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, count
 from pyspark.ml.feature import StringIndexer
@@ -10,6 +14,10 @@ from pyspark.ml.feature import StringIndexer
 # ── 1. Démarrer Spark ────────────────────────────────────────────────
 spark = SparkSession.builder \
     .appName("ALS-Preprocessing") \
+    .config("spark.driver.extraJavaOptions",
+            "-Djavax.security.auth.useSubjectCredsOnly=false") \
+    .config("spark.executor.extraJavaOptions",
+            "-Djavax.security.auth.useSubjectCredsOnly=false") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")

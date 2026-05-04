@@ -1,4 +1,3 @@
-
 # Dataset trop lourd pour GitHub
 data/*.csv
 data/*.zip
@@ -21,8 +20,6 @@ data/
 .env
 __pycache__/
 *.pyc
-als_model/
 output/
 checkpoints/
 *.parquet
-

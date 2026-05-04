@@ -192,3 +192,176 @@ depuis `localhost:9092` / topic `reviews_stream` si tu veux afficher le flux en 
 
 **Membre A** — Ingestion des données / Infrastructure Kafka  
 Module Big Data — 2025-2026
+
+
+# 👤 Membre B — Spark MLlib + ALS (Data Scientist)
+## Système de Recommandation Big Data 2025-2026
+
+---
+
+## 🎯 Ce que fait cette partie
+
+Ce module constitue le **cerveau du système de recommandation**.  
+Il nettoie les données, entraîne un modèle ALS (filtrage collaboratif) et génère des recommandations Top-5 en temps réel depuis Kafka.
+
+---
+
+## ✅ Résultats obtenus
+
+| Métrique | Valeur |
+|---|---|
+| Lignes brutes | 568 454 |
+| Lignes après nettoyage | 187 695 |
+| Algorithme | ALS (Alternating Least Squares) |
+| Meilleure config | rank=20, regParam=0.2, maxIter=15 |
+| RMSE validation | 0.8114 |
+| **RMSE test final** | **0.8334** |
+
+---
+
+## 🗂️ Structure des fichiers
+
+```
+projet-recommandation_BIG_DATA/
+├── etape1_nettoyage.py          ← Nettoyage et prétraitement des données
+├── etape2_als_training.py       ← Entraînement et évaluation du modèle ALS
+├── etape3_spark_streaming.py    ← Streaming Kafka → recommandations temps réel
+├── als_model/                   ← Modèle ALS entraîné (itemFactors, userFactors, metadata)
+├── data/
+│   ├── Reviews.csv              ← Dataset Amazon (à télécharger depuis Kaggle)
+│   └── cleaned_reviews.parquet  ← Données nettoyées (généré par étape 1)
+├── output/
+│   └── recommendations/         ← Recommandations JSON (généré par étape 3)
+├── checkpoints/                 ← Checkpoints Spark Streaming
+├── resultats_rmse.txt           ← Résultats officiels RMSE
+├── docker-compose-spark.yml     ← Configuration Docker Spark
+└── .gitignore                   ← Fichiers exclus de Git
+```
+
+---
+
+## ⚙️ Prérequis
+
+| Outil | Version |
+|---|---|
+| Python | 3.12.7 |
+| Java | **8** (jdk-8.0.482.8-hotspot) — OBLIGATOIRE |
+| PySpark | 3.4.0 |
+| Hadoop | 3.3.6 (winutils.exe) |
+| Docker Desktop | Dernière version |
+
+---
+
+## 🚀 Installation et lancement
+
+### 1. Cloner le repo
+```bash
+git clone https://github.com/salmaaz29/projet-recommandation_BIG_DATA.git
+cd projet-recommandation_BIG_DATA
+```
+
+### 2. Télécharger le dataset
+Télécharge `Reviews.csv` depuis Kaggle :
+🔗 https://www.kaggle.com/snap/amazon-fine-food-reviews
+
+Place-le dans `data/Reviews.csv`
+
+### 3. Créer et activer l'environnement virtuel
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install pyspark==3.4.0 numpy pandas setuptools python-dotenv
+```
+
+### 4. Configurer Java 8 (OBLIGATOIRE avant chaque lancement)
+```cmd
+set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot
+set PATH=%JAVA_HOME%\bin;%PATH%
+set JAVA_TOOL_OPTIONS=
+```
+
+### 5. Lancer l'étape 1 — Nettoyage des données
+```cmd
+python etape1_nettoyage.py
+```
+**Résultat :** `data/cleaned_reviews.parquet` créé
+
+### 6. Lancer l'étape 2 — Entraînement ALS
+```cmd
+python etape2_als_training.py
+```
+⏳ Durée : 10-20 minutes
+
+**Résultat :** `als_model/` et `resultats_rmse.txt` créés
+
+### 7. Lancer Kafka (Membre A doit avoir lancé docker-compose up -d)
+```cmd
+cd kafka
+python producer.py
+```
+
+### 8. Lancer l'étape 3 — Streaming temps réel
+Dans un nouveau terminal :
+```cmd
+venv\Scripts\activate
+set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot
+set PATH=%JAVA_HOME%\bin;%PATH%
+set JAVA_TOOL_OPTIONS=
+python etape3_spark_streaming.py
+```
+
+**Résultat :** Recommandations Top-5 générées dans `output/recommendations/`
+
+---
+
+## 🔌 Informations pour les autres membres
+
+### Pour Membre C (Airflow) :
+| Paramètre | Valeur |
+|---|---|
+| Script étape 1 | `python etape1_nettoyage.py` |
+| Script étape 2 | `python etape2_als_training.py` |
+| Script étape 3 | `python etape3_spark_streaming.py` |
+| Dépendance étape 1 | Aucune — peut tourner seul |
+| Dépendance étape 2 | Après étape 1 |
+| Dépendance étape 3 | Après Kafka (Membre A) + étape 2 |
+| Java requis | `set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot` |
+
+### Pour Membre D (API/Dashboard) :
+| Paramètre | Valeur |
+|---|---|
+| Modèle ALS | `als_model/` |
+| Recommandations JSON | `output/recommendations/` |
+| Format recommandations | `{user_idx, recommendations: [{product_idx, score}]}` |
+| Mise à jour | Toutes les 10 secondes (streaming) |
+
+---
+
+## ❗ Problèmes fréquents et solutions
+
+| Erreur | Solution |
+|---|---|
+| `getSubject is not supported` | Utiliser Java 8 : `set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot` |
+| `No module named distutils` | `pip install setuptools` |
+| `Ratings MUST NOT be Null or NaN` | Ajouter `df.dropna()` avant `als.fit()` |
+| `kafka:9092 DNS resolution failed` | Utiliser `localhost:9092` dans le script streaming |
+| `No module named pyspark` | Activer le venv : `venv\Scripts\activate` |
+
+---
+
+## 📊 Exemple de recommandations générées
+
+```
++--------+-----------------------------------------------------------------------+
+|user_idx|recommendations                                                        |
++--------+-----------------------------------------------------------------------+
+|8022    |[{3924, 8.76}, {3140, 5.83}, {3979, 5.18}, {617, 5.08}, {5586, 5.04}] |
+|9692    |[{3924, 5.91}, {5038, 4.97}, {617, 4.93}, {5939, 4.88}, {695, 4.80}]  |
++--------+-----------------------------------------------------------------------+
+```
+
+---
+
+## 👤 Auteur
+Membre B — Data Scientist / Spark MLlib + ALS  
+Module Big Data — 2025-2026

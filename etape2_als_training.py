@@ -3,13 +3,22 @@
 Personne 2 : Data Scientist / Spark ML
 """
 
+import os
+os.environ['PYSPARK_PYTHON'] = 'python'
+os.environ['JAVA_TOOL_OPTIONS'] = '-Djavax.security.auth.useSubjectCredsOnly=false'
+
 from pyspark.sql import SparkSession
 from pyspark.ml.recommendation import ALS
 from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.sql.functions import col
 
-# ── 1. Démarrer Spark ────────────────────────────────────────────────
+
 spark = SparkSession.builder \
     .appName("ALS-Training") \
+    .config("spark.driver.extraJavaOptions",
+            "-Djavax.security.auth.useSubjectCredsOnly=false") \
+    .config("spark.executor.extraJavaOptions",
+            "-Djavax.security.auth.useSubjectCredsOnly=false") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
@@ -17,6 +26,15 @@ spark.sparkContext.setLogLevel("WARN")
 # ── 2. Charger les données nettoyées ────────────────────────────────
 df = spark.read.parquet("data/cleaned_reviews.parquet")
 print(f"Lignes chargées : {df.count()}")
+
+# Supprimer les nulls et NaN résiduels (obligatoire pour ALS)
+df = df.dropna(subset=["user_idx", "product_idx", "Score"])
+df = df.filter(
+    (col("Score").isNotNull()) &
+    (col("user_idx").isNotNull()) &
+    (col("product_idx").isNotNull())
+)
+print(f"Lignes après nettoyage final : {df.count()}")
 
 # ── 3. Découper en train / validation / test ─────────────────────────
 # 80% entraînement, 10% validation (tuning), 10% test final
