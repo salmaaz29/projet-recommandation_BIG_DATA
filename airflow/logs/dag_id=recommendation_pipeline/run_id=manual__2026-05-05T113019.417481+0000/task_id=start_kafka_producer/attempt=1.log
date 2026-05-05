@@ -1,0 +1,43 @@
+[2026-05-05T11:30:22.766+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: recommendation_pipeline.start_kafka_producer manual__2026-05-05T11:30:19.417481+00:00 [queued]>
+[2026-05-05T11:30:22.788+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: recommendation_pipeline.start_kafka_producer manual__2026-05-05T11:30:19.417481+00:00 [queued]>
+[2026-05-05T11:30:22.790+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 2
+[2026-05-05T11:30:22.820+0000] {taskinstance.py:2191} INFO - Executing <Task(BashOperator): start_kafka_producer> on 2026-05-05 11:30:19.417481+00:00
+[2026-05-05T11:30:22.829+0000] {standard_task_runner.py:60} INFO - Started process 416 to run task
+[2026-05-05T11:30:22.836+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'recommendation_pipeline', 'start_kafka_producer', 'manual__2026-05-05T11:30:19.417481+00:00', '--job-id', '10', '--raw', '--subdir', 'DAGS_FOLDER/recommendation_pipeline_dag.py', '--cfg-path', '/tmp/tmp8c818eos']
+[2026-05-05T11:30:22.841+0000] {standard_task_runner.py:88} INFO - Job 10: Subtask start_kafka_producer
+[2026-05-05T11:30:22.935+0000] {task_command.py:423} INFO - Running <TaskInstance: recommendation_pipeline.start_kafka_producer manual__2026-05-05T11:30:19.417481+00:00 [running]> on host ae7d4869711a
+[2026-05-05T11:30:23.108+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='personne3' AIRFLOW_CTX_DAG_ID='recommendation_pipeline' AIRFLOW_CTX_TASK_ID='start_kafka_producer' AIRFLOW_CTX_EXECUTION_DATE='2026-05-05T11:30:19.417481+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-05-05T11:30:19.417481+00:00'
+[2026-05-05T11:30:23.117+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-05-05T11:30:23.123+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', '\n        echo "TACHE 1 — Demarrage Kafka Producer"\n        echo "Broker : localhost:9092"\n        echo "Topic  : reviews_stream"\n\n        cd /opt/***/project\n\n        pip install kafka-python pandas --quiet 2>/dev/null || true\n\n        if [ ! -f "data/Reviews.csv" ]; then\n            echo "ERREUR : data/Reviews.csv introuvable"\n            exit 1\n        fi\n\n        echo "Dataset trouve : data/Reviews.csv"\n        echo "Lancement du producer en arriere-plan..."\n\n        nohup python kafka/producer.py > /tmp/kafka_producer.log 2>&1 &\n        PRODUCER_PID=$!\n        echo $PRODUCER_PID > /tmp/kafka_producer.pid\n\n        echo "Producer lance (PID: $PRODUCER_PID)"\n        sleep 8\n\n        if kill -0 $PRODUCER_PID 2>/dev/null; then\n            echo "Producer actif — messages en cours d envoi"\n            tail -5 /tmp/kafka_producer.log\n        else\n            echo "ERREUR : Le producer s est arrete"\n            cat /tmp/kafka_producer.log\n            exit 1\n        fi\n    ']
+[2026-05-05T11:30:23.166+0000] {subprocess.py:86} INFO - Output:
+[2026-05-05T11:30:23.186+0000] {subprocess.py:93} INFO - TACHE 1 — Demarrage Kafka Producer
+[2026-05-05T11:30:23.189+0000] {subprocess.py:93} INFO - Broker : localhost:9092
+[2026-05-05T11:30:23.193+0000] {subprocess.py:93} INFO - Topic  : reviews_stream
+[2026-05-05T11:30:30.036+0000] {subprocess.py:93} INFO - Dataset trouve : data/Reviews.csv
+[2026-05-05T11:30:30.037+0000] {subprocess.py:93} INFO - Lancement du producer en arriere-plan...
+[2026-05-05T11:30:30.039+0000] {subprocess.py:93} INFO - Producer lance (PID: 436)
+[2026-05-05T11:30:38.045+0000] {subprocess.py:93} INFO - ERREUR : Le producer s est arrete
+[2026-05-05T11:30:38.052+0000] {subprocess.py:93} INFO - Traceback (most recent call last):
+[2026-05-05T11:30:38.053+0000] {subprocess.py:93} INFO -   File "kafka/producer.py", line 71, in <module>
+[2026-05-05T11:30:38.055+0000] {subprocess.py:93} INFO -     producer = create_producer()
+[2026-05-05T11:30:38.056+0000] {subprocess.py:93} INFO -   File "kafka/producer.py", line 15, in create_producer
+[2026-05-05T11:30:38.057+0000] {subprocess.py:93} INFO -     producer = KafkaProducer(
+[2026-05-05T11:30:38.059+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.8/site-packages/kafka/producer/kafka.py", line 485, in __init__
+[2026-05-05T11:30:38.060+0000] {subprocess.py:93} INFO -     client = self.config['kafka_client'](
+[2026-05-05T11:30:38.061+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.8/site-packages/kafka/client_async.py", line 262, in __init__
+[2026-05-05T11:30:38.063+0000] {subprocess.py:93} INFO -     self.config['api_version'] = self.check_version()
+[2026-05-05T11:30:38.064+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.8/site-packages/kafka/client_async.py", line 1076, in check_version
+[2026-05-05T11:30:38.065+0000] {subprocess.py:93} INFO -     raise Errors.NoBrokersAvailable()
+[2026-05-05T11:30:38.067+0000] {subprocess.py:93} INFO - kafka.errors.NoBrokersAvailable: NoBrokersAvailable
+[2026-05-05T11:30:38.068+0000] {subprocess.py:97} INFO - Command exited with return code 1
+[2026-05-05T11:30:38.098+0000] {taskinstance.py:2698} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/bash.py", line 212, in execute
+    raise AirflowException(
+airflow.exceptions.AirflowException: Bash command failed. The command returned a non-zero exit code 1.
+[2026-05-05T11:30:38.109+0000] {taskinstance.py:1138} INFO - Marking task as UP_FOR_RETRY. dag_id=recommendation_pipeline, task_id=start_kafka_producer, execution_date=20260505T113019, start_date=20260505T113022, end_date=20260505T113038
+[2026-05-05T11:30:38.167+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 10 for task start_kafka_producer (Bash command failed. The command returned a non-zero exit code 1.; 416)
+[2026-05-05T11:30:38.227+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2026-05-05T11:30:38.340+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check
