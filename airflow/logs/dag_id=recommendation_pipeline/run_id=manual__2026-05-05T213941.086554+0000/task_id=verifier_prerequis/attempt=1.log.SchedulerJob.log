@@ -1,0 +1,1 @@
+[2026-05-05T21:39:40.451+0000] {scheduler_job_runner.py:781} ERROR - Executor reports task instance <TaskInstance: recommendation_pipeline.verifier_prerequis manual__2026-05-05T21:39:41.086554+00:00 [queued]> finished (success) although the task says it's queued. (Info: None) Was the task killed externally?

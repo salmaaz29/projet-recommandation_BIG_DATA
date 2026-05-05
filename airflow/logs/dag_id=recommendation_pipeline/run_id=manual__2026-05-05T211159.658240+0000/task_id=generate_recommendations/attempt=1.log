@@ -1,0 +1,48 @@
+[2026-05-05T21:12:34.905+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: recommendation_pipeline.generate_recommendations manual__2026-05-05T21:11:59.658240+00:00 [queued]>
+[2026-05-05T21:12:34.921+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: recommendation_pipeline.generate_recommendations manual__2026-05-05T21:11:59.658240+00:00 [queued]>
+[2026-05-05T21:12:34.922+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 2
+[2026-05-05T21:12:34.950+0000] {taskinstance.py:2191} INFO - Executing <Task(BashOperator): generate_recommendations> on 2026-05-05 21:11:59.658240+00:00
+[2026-05-05T21:12:34.956+0000] {standard_task_runner.py:60} INFO - Started process 227 to run task
+[2026-05-05T21:12:34.963+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'recommendation_pipeline', 'generate_recommendations', 'manual__2026-05-05T21:11:59.658240+00:00', '--job-id', '43', '--raw', '--subdir', 'DAGS_FOLDER/recommendation_pipeline_dag.py', '--cfg-path', '/tmp/tmpqs_23t9a']
+[2026-05-05T21:12:34.967+0000] {standard_task_runner.py:88} INFO - Job 43: Subtask generate_recommendations
+[2026-05-05T21:12:35.038+0000] {task_command.py:423} INFO - Running <TaskInstance: recommendation_pipeline.generate_recommendations manual__2026-05-05T21:11:59.658240+00:00 [running]> on host 54f34fcc45b9
+[2026-05-05T21:12:35.169+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='personne3' AIRFLOW_CTX_DAG_ID='recommendation_pipeline' AIRFLOW_CTX_TASK_ID='generate_recommendations' AIRFLOW_CTX_EXECUTION_DATE='2026-05-05T21:11:59.658240+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-05-05T21:11:59.658240+00:00'
+[2026-05-05T21:12:35.172+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-05-05T21:12:35.173+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', '\n        echo "TACHE 2 : Spark Streaming + ALS"\n\n        KAFKA_IP=$(getent hosts kafka 2>/dev/null | awk \'{print $1}\')\n        if [ -z "$KAFKA_IP" ]; then\n            KAFKA_IP="host.docker.internal"\n        fi\n        KAFKA_BROKER="${KAFKA_IP}:9092"\n        echo "Broker : $KAFKA_BROKER"\n\n        cd /opt/***/project\n\n        export JAVA_HOME="/usr/lib/jvm/temurin-11-jdk-amd64"\n        export PATH="$JAVA_HOME/bin:$PATH"\n        export JAVA_TOOL_OPTIONS=""\n        export PYSPARK_PYTHON="python3"\n\n        echo "Java version :"\n        java -version 2>&1\n\n        mkdir -p output/recommendations\n        mkdir -p checkpoints/streaming\n\n        echo "Lancement du streaming (120 secondes)..."\n        KAFKA_BROKER=$KAFKA_BROKER timeout 150 python3 /tmp/etape3_fixed.py             > /tmp/spark_streaming.log 2>&1 || true\n\n        echo "Streaming termine."\n        NB=$(find output/recommendations -name "*.json" 2>/dev/null | wc -l)\n        echo "Fichiers JSON generes : $NB"\n\n        if [ "$NB" -gt "0" ]; then\n            echo "SUCCES : Recommandations generees !"\n            find output/recommendations -name "*.json" | head -2 | while read f; do\n                echo "Fichier : $f"\n                head -3 "$f"\n            done\n        else\n            echo "Aucun fichier JSON trouve."\n            echo "--- Fin du log Spark ---"\n            tail -20 /tmp/spark_streaming.log\n        fi\n    ']
+[2026-05-05T21:12:35.188+0000] {subprocess.py:86} INFO - Output:
+[2026-05-05T21:12:35.190+0000] {subprocess.py:93} INFO - TACHE 2 : Spark Streaming + ALS
+[2026-05-05T21:12:35.195+0000] {subprocess.py:93} INFO - Broker : 172.20.0.3:9092
+[2026-05-05T21:12:35.196+0000] {subprocess.py:93} INFO - Java version :
+[2026-05-05T21:12:35.216+0000] {subprocess.py:93} INFO - Picked up JAVA_TOOL_OPTIONS:
+[2026-05-05T21:12:35.321+0000] {subprocess.py:93} INFO - openjdk version "11.0.31" 2026-04-21
+[2026-05-05T21:12:35.322+0000] {subprocess.py:93} INFO - OpenJDK Runtime Environment Temurin-11.0.31+11 (build 11.0.31+11)
+[2026-05-05T21:12:35.323+0000] {subprocess.py:93} INFO - OpenJDK 64-Bit Server VM Temurin-11.0.31+11 (build 11.0.31+11, mixed mode)
+[2026-05-05T21:12:35.356+0000] {subprocess.py:93} INFO - Lancement du streaming (120 secondes)...
+[2026-05-05T21:12:52.497+0000] {subprocess.py:93} INFO - Streaming termine.
+[2026-05-05T21:12:52.534+0000] {subprocess.py:93} INFO - Fichiers JSON generes : 0
+[2026-05-05T21:12:52.537+0000] {subprocess.py:93} INFO - Aucun fichier JSON trouve.
+[2026-05-05T21:12:52.540+0000] {subprocess.py:93} INFO - --- Fin du log Spark ---
+[2026-05-05T21:12:52.546+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.to$(TraversableOnce.scala:364)
+[2026-05-05T21:12:52.548+0000] {subprocess.py:93} INFO - 	at scala.collection.AbstractIterator.to(Iterator.scala:1431)
+[2026-05-05T21:12:52.550+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toBuffer(TraversableOnce.scala:358)
+[2026-05-05T21:12:52.552+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toBuffer$(TraversableOnce.scala:358)
+[2026-05-05T21:12:52.554+0000] {subprocess.py:93} INFO - 	at scala.collection.AbstractIterator.toBuffer(Iterator.scala:1431)
+[2026-05-05T21:12:52.556+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toArray(TraversableOnce.scala:345)
+[2026-05-05T21:12:52.558+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toArray$(TraversableOnce.scala:339)
+[2026-05-05T21:12:52.560+0000] {subprocess.py:93} INFO - 	at scala.collection.AbstractIterator.toArray(Iterator.scala:1431)
+[2026-05-05T21:12:52.562+0000] {subprocess.py:93} INFO - 	at org.apache.spark.rdd.RDD.$anonfun$take$2(RDD.scala:1462)
+[2026-05-05T21:12:52.566+0000] {subprocess.py:93} INFO - 	at org.apache.spark.SparkContext.$anonfun$runJob$5(SparkContext.scala:2303)
+[2026-05-05T21:12:52.568+0000] {subprocess.py:93} INFO - 	at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:92)
+[2026-05-05T21:12:52.569+0000] {subprocess.py:93} INFO - 	at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:161)
+[2026-05-05T21:12:52.571+0000] {subprocess.py:93} INFO - 	at org.apache.spark.scheduler.Task.run(Task.scala:139)
+[2026-05-05T21:12:52.573+0000] {subprocess.py:93} INFO - 	at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$3(Executor.scala:554)
+[2026-05-05T21:12:52.575+0000] {subprocess.py:93} INFO - 	at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:1529)
+[2026-05-05T21:12:52.577+0000] {subprocess.py:93} INFO - 	at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:557)
+[2026-05-05T21:12:52.579+0000] {subprocess.py:93} INFO - 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+[2026-05-05T21:12:52.581+0000] {subprocess.py:93} INFO - 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+[2026-05-05T21:12:52.583+0000] {subprocess.py:93} INFO - 	... 1 more
+[2026-05-05T21:12:52.586+0000] {subprocess.py:93} INFO - 
+[2026-05-05T21:12:52.588+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-05-05T21:12:52.713+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=recommendation_pipeline, task_id=generate_recommendations, execution_date=20260505T211159, start_date=20260505T211234, end_date=20260505T211252
+[2026-05-05T21:12:52.837+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2026-05-05T21:12:52.866+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

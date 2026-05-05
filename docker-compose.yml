@@ -12,21 +12,19 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
-
-    # Kafka attend que Zookeeper soit démarré avant de se lancer. Sans ça, Kafka crashe au démarrage.
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
+      - "9093:9093"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
-      #l'adresse que notre script Python utilisera pour se connecter à Kafka
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      
-      # On n'a qu'un seul serveur Kafka (pas un cluster), donc on met 1. En production on mettrait 3 minimum.
+      # 9092 = pour les scripts sur le PC Windows (localhost)
+      # 9093 = pour les conteneurs Docker (Airflow -> Kafka)
+      KAFKA_LISTENERS: PLAINTEXT_HOST://0.0.0.0:9092,PLAINTEXT_DOCKER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092,PLAINTEXT_DOCKER://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_HOST:PLAINTEXT,PLAINTEXT_DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_HOST
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      
-      # Quand notre producer va envoyer des messages dans le topic reviews_stream, Kafka va créer ce topic automatiquement sans qu'on ait besoin de le faire à la main.
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'

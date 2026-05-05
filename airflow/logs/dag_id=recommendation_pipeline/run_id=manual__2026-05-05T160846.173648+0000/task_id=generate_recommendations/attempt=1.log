@@ -1,0 +1,60 @@
+[2026-05-05T16:09:27.417+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: recommendation_pipeline.generate_recommendations manual__2026-05-05T16:08:46.173648+00:00 [queued]>
+[2026-05-05T16:09:27.429+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: recommendation_pipeline.generate_recommendations manual__2026-05-05T16:08:46.173648+00:00 [queued]>
+[2026-05-05T16:09:27.430+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 2
+[2026-05-05T16:09:27.448+0000] {taskinstance.py:2191} INFO - Executing <Task(BashOperator): generate_recommendations> on 2026-05-05 16:08:46.173648+00:00
+[2026-05-05T16:09:27.461+0000] {standard_task_runner.py:60} INFO - Started process 253 to run task
+[2026-05-05T16:09:27.470+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'recommendation_pipeline', 'generate_recommendations', 'manual__2026-05-05T16:08:46.173648+00:00', '--job-id', '26', '--raw', '--subdir', 'DAGS_FOLDER/recommendation_pipeline_dag.py', '--cfg-path', '/tmp/tmp9ytb1nl9']
+[2026-05-05T16:09:27.475+0000] {standard_task_runner.py:88} INFO - Job 26: Subtask generate_recommendations
+[2026-05-05T16:09:27.543+0000] {task_command.py:423} INFO - Running <TaskInstance: recommendation_pipeline.generate_recommendations manual__2026-05-05T16:08:46.173648+00:00 [running]> on host 251a3406cd93
+[2026-05-05T16:09:27.645+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='personne3' AIRFLOW_CTX_DAG_ID='recommendation_pipeline' AIRFLOW_CTX_TASK_ID='generate_recommendations' AIRFLOW_CTX_EXECUTION_DATE='2026-05-05T16:08:46.173648+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-05-05T16:08:46.173648+00:00'
+[2026-05-05T16:09:27.646+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-05-05T16:09:27.648+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', '\n        echo "TACHE 2 : Spark Streaming + ALS"\n\n        # Resoudre le broker Kafka\n        KAFKA_IP=$(getent hosts kafka 2>/dev/null | awk \'{print $1}\')\n        if [ -z "$KAFKA_IP" ]; then\n            KAFKA_IP="host.docker.internal"\n        fi\n        KAFKA_BROKER="${KAFKA_IP}:9092"\n        echo "Broker : $KAFKA_BROKER"\n\n        cd /opt/***/project\n\n        # CORRECTION : utiliser le bon JAVA_HOME (Temurin, pas openjdk)\n        export JAVA_HOME="/usr/lib/jvm/temurin-11-jdk-amd64"\n        export PATH="$JAVA_HOME/bin:$PATH"\n        export JAVA_TOOL_OPTIONS=""\n        export PYSPARK_PYTHON="python3"\n\n        # Verifier que java est bien accessible\n        echo "Java version :"\n        java -version 2>&1 || { echo "ERREUR : Java introuvable dans $JAVA_HOME"; exit 1; }\n\n        mkdir -p output/recommendations\n        mkdir -p checkpoints/streaming\n\n        # Creer une version modifiee de etape3 avec le bon broker\n        # ET startingOffsets = earliest pour ne pas rater les messages\n        sed "s|localhost:9092|${KAFKA_BROKER}|g" etape3_spark_streaming.py > /tmp/etape3_docker.py\n        sed -i \'s|"startingOffsets", "latest"|"startingOffsets", "earliest"|g\' /tmp/etape3_docker.py\n\n        echo "Broker remplace : localhost:9092 -> $KAFKA_BROKER"\n        echo "startingOffsets -> earliest"\n        echo "Lancement du streaming (150 secondes)..."\n\n        export JAVA_HOME="/usr/lib/jvm/temurin-11-jdk-amd64"\n        timeout 150 python3 /tmp/etape3_docker.py > /tmp/spark_streaming.log 2>&1 || true\n\n        echo "Streaming termine."\n        NB=$(find output/recommendations -name "*.json" 2>/dev/null | wc -l)\n        echo "Fichiers JSON generes : $NB"\n\n        if [ "$NB" -gt "0" ]; then\n            echo "Recommandations generees avec succes !"\n            find output/recommendations -name "*.json" | head -2 | while read f; do\n                echo "Fichier : $f"\n                head -3 "$f"\n            done\n        else\n            echo "Aucun fichier JSON trouve."\n            echo "--- Fin du log Spark ---"\n            tail -30 /tmp/spark_streaming.log\n        fi\n    ']
+[2026-05-05T16:09:27.656+0000] {subprocess.py:86} INFO - Output:
+[2026-05-05T16:09:27.658+0000] {subprocess.py:93} INFO - TACHE 2 : Spark Streaming + ALS
+[2026-05-05T16:09:31.046+0000] {subprocess.py:93} INFO - Broker : host.docker.internal:9092
+[2026-05-05T16:09:31.047+0000] {subprocess.py:93} INFO - Java version :
+[2026-05-05T16:09:31.054+0000] {subprocess.py:93} INFO - Picked up JAVA_TOOL_OPTIONS:
+[2026-05-05T16:09:31.161+0000] {subprocess.py:93} INFO - openjdk version "11.0.31" 2026-04-21
+[2026-05-05T16:09:31.162+0000] {subprocess.py:93} INFO - OpenJDK Runtime Environment Temurin-11.0.31+11 (build 11.0.31+11)
+[2026-05-05T16:09:31.163+0000] {subprocess.py:93} INFO - OpenJDK 64-Bit Server VM Temurin-11.0.31+11 (build 11.0.31+11, mixed mode)
+[2026-05-05T16:09:31.190+0000] {subprocess.py:93} INFO - Broker remplace : localhost:9092 -> host.docker.internal:9092
+[2026-05-05T16:09:31.191+0000] {subprocess.py:93} INFO - startingOffsets -> earliest
+[2026-05-05T16:09:31.191+0000] {subprocess.py:93} INFO - Lancement du streaming (150 secondes)...
+[2026-05-05T16:09:54.861+0000] {subprocess.py:93} INFO - Streaming termine.
+[2026-05-05T16:09:54.879+0000] {subprocess.py:93} INFO - Fichiers JSON generes : 0
+[2026-05-05T16:09:54.880+0000] {subprocess.py:93} INFO - Aucun fichier JSON trouve.
+[2026-05-05T16:09:54.881+0000] {subprocess.py:93} INFO - --- Fin du log Spark ---
+[2026-05-05T16:09:54.885+0000] {subprocess.py:93} INFO - 	at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+[2026-05-05T16:09:54.885+0000] {subprocess.py:93} INFO - 	at scala.collection.Iterator$SliceIterator.hasNext(Iterator.scala:268)
+[2026-05-05T16:09:54.886+0000] {subprocess.py:93} INFO - 	at scala.collection.Iterator.foreach(Iterator.scala:943)
+[2026-05-05T16:09:54.887+0000] {subprocess.py:93} INFO - 	at scala.collection.Iterator.foreach$(Iterator.scala:943)
+[2026-05-05T16:09:54.888+0000] {subprocess.py:93} INFO - 	at scala.collection.AbstractIterator.foreach(Iterator.scala:1431)
+[2026-05-05T16:09:54.889+0000] {subprocess.py:93} INFO - 	at scala.collection.generic.Growable.$plus$plus$eq(Growable.scala:62)
+[2026-05-05T16:09:54.890+0000] {subprocess.py:93} INFO - 	at scala.collection.generic.Growable.$plus$plus$eq$(Growable.scala:53)
+[2026-05-05T16:09:54.890+0000] {subprocess.py:93} INFO - 	at scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:105)
+[2026-05-05T16:09:54.891+0000] {subprocess.py:93} INFO - 	at scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:49)
+[2026-05-05T16:09:54.891+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.to(TraversableOnce.scala:366)
+[2026-05-05T16:09:54.892+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.to$(TraversableOnce.scala:364)
+[2026-05-05T16:09:54.893+0000] {subprocess.py:93} INFO - 	at scala.collection.AbstractIterator.to(Iterator.scala:1431)
+[2026-05-05T16:09:54.893+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toBuffer(TraversableOnce.scala:358)
+[2026-05-05T16:09:54.894+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toBuffer$(TraversableOnce.scala:358)
+[2026-05-05T16:09:54.894+0000] {subprocess.py:93} INFO - 	at scala.collection.AbstractIterator.toBuffer(Iterator.scala:1431)
+[2026-05-05T16:09:54.895+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toArray(TraversableOnce.scala:345)
+[2026-05-05T16:09:54.895+0000] {subprocess.py:93} INFO - 	at scala.collection.TraversableOnce.toArray$(TraversableOnce.scala:339)
+[2026-05-05T16:09:54.896+0000] {subprocess.py:93} INFO - 	at scala.collection.AbstractIterator.toArray(Iterator.scala:1431)
+[2026-05-05T16:09:54.897+0000] {subprocess.py:93} INFO - 	at org.apache.spark.rdd.RDD.$anonfun$take$2(RDD.scala:1462)
+[2026-05-05T16:09:54.898+0000] {subprocess.py:93} INFO - 	at org.apache.spark.SparkContext.$anonfun$runJob$5(SparkContext.scala:2303)
+[2026-05-05T16:09:54.898+0000] {subprocess.py:93} INFO - 	at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:92)
+[2026-05-05T16:09:54.899+0000] {subprocess.py:93} INFO - 	at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:161)
+[2026-05-05T16:09:54.900+0000] {subprocess.py:93} INFO - 	at org.apache.spark.scheduler.Task.run(Task.scala:139)
+[2026-05-05T16:09:54.901+0000] {subprocess.py:93} INFO - 	at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$3(Executor.scala:554)
+[2026-05-05T16:09:54.902+0000] {subprocess.py:93} INFO - 	at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:1529)
+[2026-05-05T16:09:54.903+0000] {subprocess.py:93} INFO - 	at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:557)
+[2026-05-05T16:09:54.904+0000] {subprocess.py:93} INFO - 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+[2026-05-05T16:09:54.905+0000] {subprocess.py:93} INFO - 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+[2026-05-05T16:09:54.906+0000] {subprocess.py:93} INFO - 	... 1 more
+[2026-05-05T16:09:54.907+0000] {subprocess.py:93} INFO - 
+[2026-05-05T16:09:54.907+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-05-05T16:09:54.949+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=recommendation_pipeline, task_id=generate_recommendations, execution_date=20260505T160846, start_date=20260505T160927, end_date=20260505T160954
+[2026-05-05T16:09:55.019+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2026-05-05T16:09:55.042+0000] {taskinstance.py:3280} INFO - 1 downstream tasks scheduled from follow-on schedule check

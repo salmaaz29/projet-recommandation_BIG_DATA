@@ -2,19 +2,18 @@ version: "3.8"
 
 # ================================================================
 #  Airflow — Personne 3
-#  Image personnalisée avec Java 8 + PySpark + kafka-python
+#  Image personnalisée avec Java 11 + PySpark + kafka-python
 #
 #  PREMIERE FOIS :
 #    docker-compose -f docker-compose-airflow.yml build
 #    docker-compose -f docker-compose-airflow.yml up airflow-init
-#    docker-compose -f docker-compose-airflow.yml up -d
+#    docker-compose -f docker-compose-airflow.yml up -d airflow-webserver airflow-scheduler
 #
 #  ENSUITE :
-#    docker-compose -f docker-compose-airflow.yml up -d
+#    docker-compose -f docker-compose-airflow.yml up -d airflow-webserver airflow-scheduler
 # ================================================================
 
 x-airflow-common: &airflow-common
-  # On utilise notre image personnalisée avec Java 8
   build: .
   image: airflow-custom:latest
   environment:
@@ -24,7 +23,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
-    JAVA_HOME: "/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64"
+    JAVA_HOME: "/usr/lib/jvm/temurin-11-jdk-amd64"
     PYSPARK_PYTHON: "python3"
   extra_hosts:
     - "host.docker.internal:host-gateway"
@@ -33,6 +32,12 @@ x-airflow-common: &airflow-common
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     - ../:/opt/airflow/project
+  # Connecté aux DEUX réseaux :
+  # - airflow_default : réseau interne Airflow (postgres, webserver, scheduler)
+  # - kafka_net       : réseau Kafka pour atteindre le conteneur kafka
+  networks:
+    - airflow_default
+    - kafka_net
   depends_on:
     postgres:
       condition: service_healthy
@@ -52,6 +57,8 @@ services:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 5s
       retries: 5
+    networks:
+      - airflow_default
 
   airflow-init:
     <<: *airflow-common
@@ -87,6 +94,17 @@ services:
     container_name: airflow_scheduler
     command: scheduler
     restart: always
+
+networks:
+  # Réseau interne Airflow (créé automatiquement)
+  airflow_default:
+    driver: bridge
+
+  # Réseau Kafka existant (déjà créé par docker-compose.yml de Personne 1)
+  # On l'importe avec external: true — on ne le recrée pas
+  kafka_net:
+    external: true
+    name: projet-recommandation_big_data_default
 
 volumes:
   postgres_data:

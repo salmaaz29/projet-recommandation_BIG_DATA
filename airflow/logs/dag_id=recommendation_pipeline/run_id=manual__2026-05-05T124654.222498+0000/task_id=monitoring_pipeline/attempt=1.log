@@ -1,0 +1,29 @@
+[2026-05-05T12:47:30.141+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: recommendation_pipeline.monitoring_pipeline manual__2026-05-05T12:46:54.222498+00:00 [queued]>
+[2026-05-05T12:47:30.158+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: recommendation_pipeline.monitoring_pipeline manual__2026-05-05T12:46:54.222498+00:00 [queued]>
+[2026-05-05T12:47:30.159+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 2
+[2026-05-05T12:47:30.187+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): monitoring_pipeline> on 2026-05-05 12:46:54.222498+00:00
+[2026-05-05T12:47:30.193+0000] {standard_task_runner.py:60} INFO - Started process 296 to run task
+[2026-05-05T12:47:30.197+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'recommendation_pipeline', 'monitoring_pipeline', 'manual__2026-05-05T12:46:54.222498+00:00', '--job-id', '21', '--raw', '--subdir', 'DAGS_FOLDER/recommendation_pipeline_dag.py', '--cfg-path', '/tmp/tmpyd8mygmw']
+[2026-05-05T12:47:30.200+0000] {standard_task_runner.py:88} INFO - Job 21: Subtask monitoring_pipeline
+[2026-05-05T12:47:30.280+0000] {task_command.py:423} INFO - Running <TaskInstance: recommendation_pipeline.monitoring_pipeline manual__2026-05-05T12:46:54.222498+00:00 [running]> on host 2946274425f0
+[2026-05-05T12:47:30.466+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='personne3' AIRFLOW_CTX_DAG_ID='recommendation_pipeline' AIRFLOW_CTX_TASK_ID='monitoring_pipeline' AIRFLOW_CTX_EXECUTION_DATE='2026-05-05T12:46:54.222498+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-05-05T12:46:54.222498+00:00'
+[2026-05-05T12:47:30.469+0000] {logging_mixin.py:188} INFO - ============================================================
+[2026-05-05T12:47:30.470+0000] {logging_mixin.py:188} INFO - TACHE 3 : MONITORING DU PIPELINE
+[2026-05-05T12:47:30.471+0000] {logging_mixin.py:188} INFO - ============================================================
+[2026-05-05T12:47:30.488+0000] {logging_mixin.py:188} INFO - 
+Fichiers de recommandations trouves : 0
+[2026-05-05T12:47:30.490+0000] {logging_mixin.py:188} INFO - Aucune recommandation trouvee.
+[2026-05-05T12:47:30.490+0000] {logging_mixin.py:188} INFO - Cause possible : Kafka n a pas envoye de batch dans le temps imparti.
+[2026-05-05T12:47:30.491+0000] {logging_mixin.py:188} INFO - 
+PERFORMANCE DU MODELE ALS :
+[2026-05-05T12:47:30.492+0000] {logging_mixin.py:188} INFO -   Algorithme      : ALS - filtrage collaboratif
+[2026-05-05T12:47:30.492+0000] {logging_mixin.py:188} INFO -   RMSE validation : 0.8114
+[2026-05-05T12:47:30.493+0000] {logging_mixin.py:188} INFO -   RMSE test final : 0.8334  (10% donnees non vues)
+[2026-05-05T12:47:30.494+0000] {logging_mixin.py:188} INFO -   Config          : rank=20, regParam=0.2, maxIter=15
+[2026-05-05T12:47:30.514+0000] {logging_mixin.py:188} INFO - 
+Rapport sauvegarde : output/rapport_monitoring.json
+[2026-05-05T12:47:30.515+0000] {logging_mixin.py:188} INFO - STATUT FINAL : AVERTISSEMENT
+[2026-05-05T12:47:30.516+0000] {python.py:201} INFO - Done. Returned value was: None
+[2026-05-05T12:47:30.530+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=recommendation_pipeline, task_id=monitoring_pipeline, execution_date=20260505T124654, start_date=20260505T124730, end_date=20260505T124730
+[2026-05-05T12:47:30.578+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2026-05-05T12:47:30.602+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check
