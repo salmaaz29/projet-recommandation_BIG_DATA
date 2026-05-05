@@ -15,11 +15,14 @@ venv/
 # VS Code
 .vscode/
 
-venv/
+# Données et outputs (trop lourds)
 data/
-.env
-__pycache__/
-*.pyc
 output/
 checkpoints/
+
+# Airflow — logs et fichiers temporaires
+airflow/logs/
+airflow/plugins/
+
+# Parquet et modèles lourds
 *.parquet

@@ -1,2 +1,0 @@
-[2026-05-05T21:39:39.479+0000] {taskinstance.py:1946} INFO - Dependencies not met for <TaskInstance: recommendation_pipeline.verifier_prerequis manual__2026-05-05T21:39:41.086554+00:00 [queued]>, dependency 'Execution Date' FAILED: Execution date 2026-05-05T21:39:41.086554+00:00 is in the future (the current date is 2026-05-05T21:39:39.479245+00:00).
-[2026-05-05T21:39:39.483+0000] {local_task_job_runner.py:160} INFO - Task is not able to be run
