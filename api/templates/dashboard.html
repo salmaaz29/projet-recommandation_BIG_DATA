@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RecoSpark — Système de Recommandation Big Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0a0d14;
+      --surface:   #111520;
+      --card:      #161c2d;
+      --border:    #1e2842;
+      --accent:    #00e5ff;
+      --accent2:   #ff6b35;
+      --accent3:   #7c3aed;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --success:   #10b981;
+      --error:     #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── Background grid ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Header ─── */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,13,20,0.9);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .logo-text h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text p {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 10px;
+    }
+
+    .badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid;
+      letter-spacing: 0.05em;
+    }
+    .badge-kafka  { color: var(--accent2); border-color: var(--accent2); }
+    .badge-spark  { color: var(--accent);  border-color: var(--accent); }
+    .badge-airflow{ color: #a78bfa;        border-color: #a78bfa; }
+
+    /* ─── Status bar ─── */
+    #status-bar {
+      position: relative; z-index: 10;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 40px;
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ─── Main layout ─── */
+    main {
+      position: relative; z-index: 10;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      grid-template-rows: auto auto 1fr;
+      gap: 24px;
+    }
+
+    /* ─── Stats row ─── */
+    .stats-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+    .stat-card:nth-child(3)::before { background: linear-gradient(90deg, #10b981, transparent); }
+    .stat-card:nth-child(4)::before { background: linear-gradient(90deg, #a78bfa, transparent); }
+
+    .stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .stat-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 4px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ─── Search panel ─── */
+    .search-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title::before {
+      content: '';
+      width: 3px; height: 16px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-group label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.1);
+    }
+    input[type="number"]::placeholder { color: var(--muted); font-size: 0.85rem; }
+
+    .btn-search {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-search:hover { opacity: 0.85; }
+    .btn-search:active { transform: scale(0.97); }
+
+    .btn-random {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-random:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .n-slider {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .n-slider label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    /* ─── Available users ─── */
+    .users-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .users-list::-webkit-scrollbar { width: 4px; }
+    .users-list::-webkit-scrollbar-track { background: var(--bg); }
+    .users-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .user-chip {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 4px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .user-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ─── Results panel ─── */
+    .results-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      background: rgba(0,229,255,0.1);
+      border: 1px solid rgba(0,229,255,0.3);
+      color: var(--accent);
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+
+    /* ─── Product cards ─── */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .product-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: fadeSlide 0.4s both;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .product-card:nth-child(1) { animation-delay: 0.05s; }
+    .product-card:nth-child(2) { animation-delay: 0.10s; }
+    .product-card:nth-child(3) { animation-delay: 0.15s; }
+    .product-card:nth-child(4) { animation-delay: 0.20s; }
+    .product-card:nth-child(5) { animation-delay: 0.25s; }
+
+    .product-rank {
+      position: absolute;
+      top: 14px; right: 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .product-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .product-id {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .product-score-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .score-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+    .score-value { color: var(--accent); }
+    .bar-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent3), var(--accent));
+      border-radius: 2px;
+      transition: width 0.8s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─── Empty / Error states ─── */
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 16px;
+      color: var(--muted);
+      text-align: center;
+      padding: 60px 0;
+    }
+    .placeholder-icon { font-size: 3rem; opacity: 0.4; }
+    .placeholder h3 { font-size: 1rem; color: var(--text); }
+    .placeholder p  { font-size: 0.8rem; font-family: 'Space Mono', monospace; }
+
+    .error-msg {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: #fca5a5;
+    }
+
+    /* ─── Pipeline info panel ─── */
+    .pipeline-panel {
+      grid-column: 1 / -1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+
+    .pipeline-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-top: 20px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .pipeline-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .step-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border: 2px solid;
+    }
+    .step-kafka   { background: rgba(255,107,53,0.1); border-color: var(--accent2); }
+    .step-spark   { background: rgba(0,229,255,0.1);  border-color: var(--accent); }
+    .step-airflow { background: rgba(124,58,237,0.1); border-color: var(--accent3); }
+    .step-api     { background: rgba(16,185,129,0.1); border-color: var(--success); }
+
+    .step-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .step-sub {
+      font-size: 0.62rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      text-align: center;
+    }
+
+    .step-arrow {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--border), var(--border));
+      position: relative;
+      min-width: 30px;
+      margin-bottom: 30px;
+    }
+    .step-arrow::after {
+      content: '▶';
+      position: absolute;
+      right: -6px;
+      top: -8px;
+      font-size: 10px;
+      color: var(--border);
+    }
+
+    .model-info {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .info-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+    .info-key {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .info-val {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ─── Loading ─── */
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-state {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      padding: 40px;
+      justify-content: center;
+    }
+
+    /* ─── JSON View ─── */
+    .json-toggle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .json-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    .json-view {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      color: #a3e635;
+      white-space: pre;
+      overflow-x: auto;
+      display: none;
+    }
+    .json-view.visible { display: block; }
+
+    /* ─── Toast ─── */
+    #toast {
+      position: fixed;
+      bottom: 30px; right: 30px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text);
+      z-index: 1000;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">
+      <h1>RecoSpark</h1>
+      <p>AMAZON FINE FOOD REVIEWS · BIG DATA 2025-2026</p>
+    </div>
+  </div>
+  <div class="header-badges">
+    <span class="badge badge-kafka">KAFKA</span>
+    <span class="badge badge-spark">SPARK ALS</span>
+    <span class="badge badge-airflow">AIRFLOW</span>
+  </div>
+</header>
+
+<!-- ── Status ── -->
+<div id="status-bar">
+  <div class="status-dot"></div>
+  <span id="status-text">Connexion à l'API...</span>
+</div>
+
+<main>
+
+  <!-- ── Stats Row ── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">👥 Utilisateurs</div>
+      <div class="stat-value" id="stat-users">—</div>
+      <div class="stat-sub">avec recommandations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🎯 RMSE Test</div>
+      <div class="stat-value" id="stat-rmse" style="color:var(--accent2)">—</div>
+      <div class="stat-sub">ALS Alternating Least Squares</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">⚙️ Config Modèle</div>
+      <div class="stat-value" id="stat-rank" style="color:var(--success);font-size:1.2rem">—</div>
+      <div class="stat-sub">rank · regParam · maxIter</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">📦 Dataset</div>
+      <div class="stat-value" style="color:#a78bfa">568K</div>
+      <div class="stat-sub">Amazon Fine Food Reviews</div>
+    </div>
+  </div>
+
+  <!-- ── Search Panel ── -->
+  <div class="search-panel">
+    <div class="panel-title">Rechercher un utilisateur</div>
+
+    <div class="input-group">
+      <label>USER INDEX (user_idx)</label>
+      <div class="input-row">
+        <input type="number" id="user-input" placeholder="ex: 101" min="0" />
+        <button class="btn-search" onclick="fetchRecommendations()">→</button>
+      </div>
+    </div>
+
+    <div class="n-slider">
+      <label>
+        Nombre de recommandations
+        <span id="n-label" style="color:var(--accent)">5</span>
+      </label>
+      <input type="range" id="n-input" min="1" max="5" value="5"
+             oninput="document.getElementById('n-label').textContent=this.value"/>
+    </div>
+
+    <button class="btn-random" onclick="fetchRandomUser()">
+      🎲 Utilisateur aléatoire
+    </button>
+
+    <div class="panel-title" style="margin-top:4px">Utilisateurs disponibles</div>
+    <div class="users-list" id="users-list">
+      <span style="font-size:0.72rem;color:var(--muted);font-family:'Space Mono',monospace">
+        Chargement...
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Results Panel ── -->
+  <div class="results-panel" id="results-panel">
+    <div class="results-header">
+      <div class="panel-title">Recommandations</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="user-badge-label" class="user-badge" style="display:none"></span>
+        <button class="json-toggle" id="json-btn" onclick="toggleJson()" style="display:none">
+          { } JSON
+        </button>
+      </div>
+    </div>
+
+    <div id="results-content">
+      <div class="placeholder">
+        <div class="placeholder-icon">🔍</div>
+        <h3>Entrez un user_idx</h3>
+        <p>Tapez un identifiant utilisateur et appuyez sur →</p>
+        <p style="margin-top:8px;color:var(--muted)">ou cliquez sur 🎲 pour un utilisateur aléatoire</p>
+      </div>
+    </div>
+
+    <div class="json-view" id="json-view"></div>
+  </div>
+
+  <!-- ── Pipeline Panel ── -->
+  <div class="pipeline-panel">
+    <div class="panel-title">Architecture du Pipeline</div>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <div class="step-icon step-kafka">🗂️</div>
+        <div class="step-label">Kafka Producer</div>
+        <div class="step-label"> & reviews_stream</div>
+
+        
+      </div>
+      <div class="step-arrow"></div>
+      <div class="pipeline-step">
+        <div class="step-icon step-spark">⚡</div>
+        <div class="step-label">Spark ALS</div>
+        <div class="step-label">MLlib Training</div>
+        
+      </div>
+      <div class="step-arrow"></div>
+      <div class="pipeline-step">
+        <div class="step-icon step-airflow">🔄</div>
+        <div class="step-label">Airflow DAG</div>
+        <div class="step-label">Orchestration</div>
+        
+      </div>
+      <div class="step-arrow"></div>
+      <div class="pipeline-step">
+        <div class="step-icon step-api">🌐</div>
+        <div class="step-label">Flask API</div>
+        <div class="step-label">Dashboard</div>
+        
+      </div>
+    </div>
+
+    <div class="model-info" id="model-info">
+      <div class="info-item">
+        <div class="info-key">Algorithme</div>
+        <div class="info-val">ALS (Collaborative Filtering)</div>
+      </div>
+      <div class="info-item">
+        <div class="info-key">Train / Val / Test</div>
+        <div class="info-val">80% / 10% / 10%</div>
+      </div>
+      <div class="info-item" id="info-rmse-val">
+        <div class="info-key">RMSE Validation</div>
+        <div class="info-val">—</div>
+      </div>
+      <div class="info-item" id="info-rmse-test">
+        <div class="info-key">RMSE Test Final</div>
+        <div class="info-val">—</div>
+      </div>
+      <div class="info-item" id="info-rank">
+        <div class="info-key">Rank</div>
+        <div class="info-val">—</div>
+      </div>
+      <div class="info-item" id="info-reg">
+        <div class="info-key">RegParam</div>
+        <div class="info-val">—</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+const API = '';  // Même domaine — Flask sert le dashboard
+
+const ICONS = ['🍕','🍫','☕','🧀','🍵','🥜','🍯','🍬','🥗','🍝','🥤','🍊','🌶️','🧂','🫙'];
+const COLORS = [
+  'rgba(0,229,255,0.15)', 'rgba(255,107,53,0.15)',
+  'rgba(124,58,237,0.15)', 'rgba(16,185,129,0.15)',
+  'rgba(251,191,36,0.15)'
+];
+
+let currentJson = null;
+
+// ── Init ──────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  checkHealth();
+  loadStats();
+  loadUsers();
+
+  document.getElementById('user-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fetchRecommendations();
+  });
+});
+
+// ── Health check ─────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const res = await fetch(`${API}/api/health`);
+    const d   = await res.json();
+    document.getElementById('status-text').textContent =
+      `API connectée · ${d.utilisateurs_en_cache} utilisateurs en cache · ${d.fichiers_trouves} fichier(s) JSON`;
+  } catch(e) {
+    document.getElementById('status-text').textContent = 'API non joignable — vérifiez que app.py tourne sur :5000';
+    document.querySelector('.status-dot').style.background = 'var(--error)';
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const res  = await fetch(`${API}/api/stats`);
+    const data = await res.json();
+
+    document.getElementById('stat-users').textContent =
+      data.total_utilisateurs_avec_recommandations ?? '—';
+
+    const modele = data.modele ?? {};
+    if (modele.rmse_test)      document.getElementById('stat-rmse').textContent = modele.rmse_test;
+    if (modele.config) {
+      const cfg = modele.config;
+      document.getElementById('stat-rank').textContent =
+        `${cfg.rank} · ${cfg.regParam} · ${cfg.maxIter}`;
+    }
+
+    // Infos en bas de page
+    if (modele.rmse_validation)
+      document.getElementById('info-rmse-val').querySelector('.info-val').textContent = modele.rmse_validation;
+    if (modele.rmse_test)
+      document.getElementById('info-rmse-test').querySelector('.info-val').textContent = modele.rmse_test;
+    if (modele.config?.rank)
+      document.getElementById('info-rank').querySelector('.info-val').textContent = modele.config.rank;
+    if (modele.config?.regParam)
+      document.getElementById('info-reg').querySelector('.info-val').textContent = modele.config.regParam;
+
+  } catch(e) {
+    console.warn('Stats non disponibles', e);
+  }
+}
+
+// ── Users list ────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const res  = await fetch(`${API}/api/users`);
+    const data = await res.json();
+    const list = document.getElementById('users-list');
+    list.innerHTML = '';
+
+    if (!data.user_ids || data.user_ids.length === 0) {
+      list.innerHTML = '<span style="font-size:0.72rem;color:var(--muted);font-family:\'Space Mono\',monospace">Aucun utilisateur disponible</span>';
+      return;
+    }
+
+    data.user_ids.slice(0, 60).forEach(uid => {
+      const chip = document.createElement('div');
+      chip.className = 'user-chip';
+      chip.textContent = uid;
+      chip.onclick = () => {
+        document.getElementById('user-input').value = uid;
+        fetchRecommendations();
+      };
+      list.appendChild(chip);
+    });
+  } catch(e) {
+    document.getElementById('users-list').innerHTML =
+      '<span style="font-size:0.72rem;color:var(--muted)">Erreur chargement</span>';
+  }
+}
+
+// ── Fetch recommendations ─────────────────────────────────────
+async function fetchRecommendations() {
+  const uid = document.getElementById('user-input').value.trim();
+  if (!uid) { showToast('⚠️ Entrez un user_idx'); return; }
+
+  const n = document.getElementById('n-input').value;
+  const content = document.getElementById('results-content');
+
+  content.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      Génération des recommandations pour user_idx ${uid}...
+    </div>`;
+
+  document.getElementById('json-view').classList.remove('visible');
+  document.getElementById('json-btn').style.display = 'none';
+  document.getElementById('user-badge-label').style.display = 'none';
+
+  try {
+    const res  = await fetch(`${API}/api/recommendations/user/${uid}?n=${n}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      content.innerHTML = `
+        <div class="error-msg">
+          ❌ ${data.error}<br><br>
+          ${data.hint ? `💡 ${data.hint}` : ''}
+          ${data.total_utilisateurs ? `<br>Total disponible : ${data.total_utilisateurs}` : ''}
+        </div>`;
+      return;
+    }
+
+    currentJson = data;
+    renderProducts(data, content);
+
+    document.getElementById('user-badge-label').textContent = `user_idx: ${uid}`;
+    document.getElementById('user-badge-label').style.display = 'inline';
+    document.getElementById('json-btn').style.display = 'inline';
+
+    showToast(`✅ ${data.total} recommandation(s) trouvées`);
+
+  } catch(e) {
+    content.innerHTML = `
+      <div class="error-msg">
+        🔌 Impossible de contacter l'API.<br>
+        Assurez-vous que <code>python app.py</code> tourne sur le port 5000.
+      </div>`;
+  }
+}
+
+// ── Render product cards ──────────────────────────────────────
+function renderProducts(data, container) {
+  if (!data.details || data.details.length === 0) {
+    container.innerHTML = `
+      <div class="placeholder">
+        <div class="placeholder-icon">😶</div>
+        <h3>Aucune recommandation</h3>
+        <p>Le modèle n'a pas de recommandation pour cet utilisateur.</p>
+      </div>`;
+    return;
+  }
+
+  const maxScore = Math.max(...data.details.map(d => d.score));
+
+  const grid = document.createElement('div');
+  grid.className = 'products-grid';
+
+  data.details.forEach((prod, i) => {
+    const pct = Math.round((prod.score / (maxScore * 1.2)) * 100);
+    const icon = ICONS[i % ICONS.length];
+    const bg   = COLORS[i % COLORS.length];
+
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+      <span class="product-rank">#${i+1}</span>
+      <div class="product-icon" style="background:${bg}">${icon}</div>
+      <div class="product-id">${prod.product_id}</div>
+      <div class="product-score-bar">
+        <div class="score-label">
+          <span>Score prédit</span>
+          <span class="score-value">${prod.score.toFixed(4)}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:0%" data-width="${pct}%"></div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(grid);
+
+  // Animate bars after DOM insertion
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  });
+}
+
+// ── Random user ───────────────────────────────────────────────
+async function fetchRandomUser() {
+  try {
+    const res  = await fetch(`${API}/api/random-user`);
+    const data = await res.json();
+    if (data.user_idx !== undefined) {
+      document.getElementById('user-input').value = data.user_idx;
+      fetchRecommendations();
+    }
+  } catch(e) {
+    showToast('❌ Impossible de récupérer un utilisateur aléatoire');
+  }
+}
+
+// ── JSON toggle ───────────────────────────────────────────────
+function toggleJson() {
+  const view = document.getElementById('json-view');
+  if (!view.classList.contains('visible')) {
+    view.textContent = JSON.stringify(currentJson, null, 2);
+    view.classList.add('visible');
+    document.getElementById('json-btn').textContent = '✕ Fermer JSON';
+  } else {
+    view.classList.remove('visible');
+    document.getElementById('json-btn').textContent = '{ } JSON';
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
