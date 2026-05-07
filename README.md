@@ -797,5 +797,6 @@ Sortie attendue :
 ---
 
 ## 👤 Auteur
-— Développeur Web / Dashboard  
+
+**Personne 4** — Développeur Web / Dashboard  
 Module Big Data — 2025-2026
