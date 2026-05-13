@@ -1,4 +1,4 @@
-# Système de recommandaƟon de produits en temps réel
+# Système de recommandation de produits en temps réel
 #  Partie 1 — Kafka + Docker Compose
 > Ingestion des données en temps réel | Projet Big Data
 
@@ -136,17 +136,6 @@ Arrête avec `Ctrl+C`.
 
 ---
 
-## 🔌 Informations pour les autres membres
-
-| Paramètre | Valeur |
-|-----------|--------|
-| Broker Kafka | `localhost:9092` |
-| Nom du topic | `reviews_stream` |
-| Format des messages | `{UserId, ProductId, Score, Time}` |
-| Nombre de messages | 568 454 |
-| Délai entre messages | 0.1 seconde |
-
-
 # Partie B — Spark MLlib + ALS (Data Scientist)
 ## Système de Recommandation Big Data 
 
@@ -267,41 +256,6 @@ python etape3_spark_streaming.py
 
 ---
 
-## 🔌 Informations pour les autres membres
-
-### Pour Membre C (Airflow) :
-| Paramètre | Valeur |
-|---|---|
-| Script étape 1 | `python etape1_nettoyage.py` |
-| Script étape 2 | `python etape2_als_training.py` |
-| Script étape 3 | `python etape3_spark_streaming.py` |
-| Dépendance étape 1 | Aucune — peut tourner seul |
-| Dépendance étape 2 | Après étape 1 |
-| Dépendance étape 3 | Après Kafka (Membre A) + étape 2 |
-| Java requis | `set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot` |
-
-### Pour Membre D (API/Dashboard) :
-| Paramètre | Valeur |
-|---|---|
-| Modèle ALS | `als_model/` |
-| Recommandations JSON | `output/recommendations/` |
-| Format recommandations | `{user_idx, recommendations: [{product_idx, score}]}` |
-| Mise à jour | Toutes les 10 secondes (streaming) |
-
----
-
-## ❗ Problèmes fréquents et solutions
-
-| Erreur | Solution |
-|---|---|
-| `getSubject is not supported` | Utiliser Java 8 : `set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot` |
-| `No module named distutils` | `pip install setuptools` |
-| `Ratings MUST NOT be Null or NaN` | Ajouter `df.dropna()` avant `als.fit()` |
-| `kafka:9092 DNS resolution failed` | Utiliser `localhost:9092` dans le script streaming |
-| `No module named pyspark` | Activer le venv : `venv\Scripts\activate` |
-
----
-
 ## 📊 Exemple de recommandations générées
 
 ```
@@ -315,13 +269,9 @@ python etape3_spark_streaming.py
 
 ---
 
-## 👤 Auteur
-Membre B — Data Scientist / Spark MLlib + ALS  
-Module Big Data — 2025-2026
 
-
-# 👤 Membre C — Ingénieur Pipeline / Airflow
-## Système de Recommandation Big Data 2025-2026
+# 👤 Partie C — Ingénieur Pipeline / Airflow
+## Système de Recommandation Big Data 
 
 ---
 
@@ -490,19 +440,6 @@ Exemple de rapport :
 
 ---
 
-## 🔌 Informations pour Membre D (API/Dashboard)
-
-| Paramètre | Valeur |
-|---|---|
-| Recommandations JSON | `output/recommendations/*.json` |
-| Format | `{user_idx, recommendations: [{product_idx, score}]}` |
-| Rapport monitoring | `output/rapport_monitoring.json` |
-| RMSE test final | 0.8334 |
-| Broker Kafka (PC) | `localhost:9092` |
-| Broker Kafka (Docker) | `kafka:9093` |
-
----
-
 ## 🏗️ Architecture réseau Docker
 
 ```
@@ -516,31 +453,6 @@ PC Windows
 ```
 
 ---
-
-## 🛑 Commandes utiles
-
-| Action | Commande |
-|--------|----------|
-| Démarrer Airflow | `docker-compose -f docker-compose-airflow.yml up -d` |
-| Arrêter Airflow | `docker-compose -f docker-compose-airflow.yml down` |
-| Voir logs scheduler | `docker logs airflow_scheduler` |
-| Voir logs webserver | `docker logs airflow_webserver` |
-| Redémarrer scheduler | `docker restart airflow_scheduler` |
-| Vérifier Java dans conteneur | `docker exec -it airflow_scheduler bash -c "java -version"` |
-
----
-
-## ❗ Problèmes fréquents et solutions
-
-| Erreur | Solution |
-|---|---|
-| `NoBrokersAvailable` depuis Airflow | Vérifier que `docker-compose.yml` a le double listener Kafka (9092 + 9093) |
-| `ChecksumException` sur als_model | Supprimer les fichiers `.crc` : `del /s /q als_model\*.crc` |
-| `Broken DAG` dans Airflow | Vérifier la syntaxe du DAG, redémarrer le scheduler |
-| Port 8081 déjà utilisé | Changer `8081:8080` en `8082:8080` dans docker-compose-airflow.yml |
-| `java: command not found` | Rebuilder l'image : `docker-compose -f docker-compose-airflow.yml build` |
-| DAG n'apparaît pas | Attendre 30 secondes, le scheduler scanne toutes les 30s |
-
 
 # Dashboard
 
