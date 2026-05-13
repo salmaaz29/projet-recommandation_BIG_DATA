@@ -594,8 +594,8 @@ PC Windows
 
 **Membre C** — Ingénieur Pipeline / Airflow  
 Module Big Data — 2025-2026
-# 👤 Personne 4 — Développeur Web / Dashboard
-## Système de Recommandation Big Data 2025-2026
+# Dashboard
+
 
 ---
 
@@ -647,7 +647,7 @@ projet-recommandation_BIG_DATA/
 | Python | 3.10+ |
 | Docker Desktop | Dernière version |
 
-> **Dépendances Personne 4 :** Le pipeline de Personnes 2 et 3 doit avoir tourné pour avoir des données dans `output/recommendations/`.
+> **Dépendances  :** Le pipeline des parties  2 et 3 doit avoir tourné pour avoir des données dans `output/recommendations/`.
 
 ---
 
@@ -789,14 +789,10 @@ Sortie attendue :
 | Erreur | Solution |
 |---|---|
 | `No module named flask` | `pip install flask flask-cors` |
-| `Aucune recommandation disponible` | Lancer d'abord `etape3_spark_streaming.py` (Personne 2) |
+| `Aucune recommandation disponible` | Lancer d'abord `etape3_spark_streaming.py` |
 | Port 5000 déjà utilisé | Modifier `app.run(port=5001)` dans app.py |
 | Données JSON vides | Vérifier que `output/recommendations/*.json` existe |
 | Dashboard blanc | Vérifier que `templates/dashboard.html` est dans `api/templates/` |
 
 ---
 
-## 👤 Auteur
-
-**Personne 4** — Développeur Web / Dashboard  
-Module Big Data — 2025-2026

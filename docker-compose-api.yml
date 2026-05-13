@@ -1,7 +1,7 @@
 version: "3.8"
 
 # ════════════════════════════════════════════════════════
-#  docker-compose-api.yml — Personne 4
+#  docker-compose-api.yml 
 #  Lance l'API Flask + Dashboard sur http://localhost:5000
 #
 #  LANCEMENT :
@@ -16,11 +16,11 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      # Monte le dossier output/ du projet (recommandations JSON de Personne 2/3)
+      # Monte le dossier output/ du projet 
       - ./output:/app/../output:ro
-      # Monte resultats_rmse.txt (généré par Personne 2)
+      # Monte resultats_rmse.txt 
       - ./resultats_rmse.txt:/app/../resultats_rmse.txt:ro
-      # Monte le rapport Airflow (généré par Personne 3)
+      # Monte le rapport Airflow 
       - ./output/rapport_monitoring.json:/app/../output/rapport_monitoring.json:ro
     restart: unless-stopped
 

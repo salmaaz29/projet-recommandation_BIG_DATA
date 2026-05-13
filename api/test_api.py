@@ -1,6 +1,6 @@
 """
 test_api.py — Tests de l'API de recommandation
-Personne 4 — Développeur Web / Dashboard
+
 
 Lance ce script APRÈS avoir démarré l'API (python app.py).
 Usage : python test_api.py
@@ -86,7 +86,7 @@ def test_all_recommendations():
 
 
 if __name__ == "__main__":
-    print("\n🚀 TESTS DE L'API RECOMMANDATION — PERSONNE 4")
+    print("\n🚀 TESTS DE L'API RECOMMANDATION — ")
     print("Assurez-vous que l'API tourne : python app.py\n")
 
     try:

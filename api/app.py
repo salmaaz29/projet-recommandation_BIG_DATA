@@ -221,7 +221,7 @@ def dashboard():
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("  API Recommandation — Personne 4")
+    print("  API Recommandation — ")
     print("  http://localhost:5000")
     print("  http://localhost:5000/api/health")
     print("  http://localhost:5000/api/recommendations/user/101")
