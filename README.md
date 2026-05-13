@@ -1,5 +1,6 @@
-# 📦 Membre A — Kafka + Docker Compose
-> Ingestion des données en temps réel | Projet Big Data 2025-2026
+# Système de recommandaƟon de produits en temps réel
+#  Partie 1 — Kafka + Docker Compose
+> Ingestion des données en temps réel | Projet Big Data
 
 ---
 
@@ -145,57 +146,9 @@ Arrête avec `Ctrl+C`.
 | Nombre de messages | 568 454 |
 | Délai entre messages | 0.1 seconde |
 
-### Pour Membre B (Spark) :
-Connecte Spark Streaming au broker `localhost:9092` et au topic `reviews_stream`.  
-Le producer doit être lancé **avant** ton job Spark Streaming.
 
-### Pour Membre C (Airflow) :
-Le script à appeler dans ton DAG est `kafka/producer.py`.  
-Assure-toi que `docker-compose up -d` est lancé avant de déclencher le DAG.
-
-### Pour Membre D (API/Dashboard) :
-Le producer tourne en continu. Tu peux consommer les messages directement  
-depuis `localhost:9092` / topic `reviews_stream` si tu veux afficher le flux en direct.
-
----
-
-## 🛑 Commandes utiles
-
-| Action | Commande |
-|--------|----------|
-| Démarrer Kafka | `docker-compose up -d` |
-| Arrêter Kafka | `docker-compose down` |
-| Voir les logs Kafka | `docker logs kafka` |
-| Voir les logs Zookeeper | `docker logs zookeeper` |
-| Lister les topics | `docker exec -it kafka kafka-topics --bootstrap-server localhost:9092 --list` |
-| Vérifier les messages | `docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic reviews_stream --from-beginning` |
-
----
-
-## ❗ Problèmes fréquents
-
-**Erreur : `open //./pipe/dockerDesktopLinuxEngine`**  
-→ Docker Desktop n'est pas démarré. Ouvre-le et attends que l'icône soit verte.
-
-**Erreur : `kafka.errors.NoBrokersAvailable`**  
-→ Kafka n'est pas lancé. Lance `docker-compose up -d` d'abord, puis relance `producer.py`.
-
-**Erreur : `FileNotFoundError: Reviews.csv`**  
-→ Le fichier CSV n'est pas dans le bon dossier. Vérifie qu'il est bien dans `data/Reviews.csv`.
-
-**Warning : `version is obsolete`**  
-→ Simple avertissement, pas une erreur. Peut être ignoré sans problème.
-
----
-
-## 👤 Auteur
-
-**Membre A** — Ingestion des données / Infrastructure Kafka  
-Module Big Data — 2025-2026
-
-
-# 👤 Membre B — Spark MLlib + ALS (Data Scientist)
-## Système de Recommandation Big Data 2025-2026
+# Partie B — Spark MLlib + ALS (Data Scientist)
+## Système de Recommandation Big Data 
 
 ---
 
@@ -588,12 +541,7 @@ PC Windows
 | `java: command not found` | Rebuilder l'image : `docker-compose -f docker-compose-airflow.yml build` |
 | DAG n'apparaît pas | Attendre 30 secondes, le scheduler scanne toutes les 30s |
 
----
 
-## 👤 Auteur
-
-**Membre C** — Ingénieur Pipeline / Airflow  
-Module Big Data — 2025-2026
 # Dashboard
 
 
