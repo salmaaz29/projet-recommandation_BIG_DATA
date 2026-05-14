@@ -73,11 +73,29 @@ print("\n=== Aperçu du dataset nettoyé ===")
 df.select("user_idx", "product_idx", "Score").show(10)
 print(f"Lignes finales : {df.count()}")
 
-# ── 10. Sauvegarder pour réutilisation ──────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════
+# ⚠️  IMPORTANT : NOUVEAU CODE AJOUTÉ ⚠️
+# ═══════════════════════════════════════════════════════════════════════
+
+# ── 10. Sauvegarder le MAPPING (UserId → user_idx) pour l'étape 3 ────
+print("\n📊 Sauvegarde du mapping UserId → user_idx...")
+mapping = df.select("UserId", "user_idx").distinct()
+mapping.write.mode("overwrite").parquet("data/user_mapping.parquet")
+print(f"✅ Mapping sauvegardé : {mapping.count()} utilisateurs")
+print("   Fichier : data/user_mapping.parquet")
+
+# Afficher un aperçu du mapping
+print("\nAperçu du mapping :")
+mapping.show(10)
+
+# ── 11. Sauvegarder les données nettoyées pour l'entraînement ─────────
+print("\n💾 Sauvegarde des données nettoyées...")
 df.select("user_idx", "product_idx", "Score") \
   .write.mode("overwrite") \
   .parquet("data/cleaned_reviews.parquet")
 
 print("✅ Données nettoyées sauvegardées dans data/cleaned_reviews.parquet")
+print("   Contient uniquement : user_idx, product_idx, Score")
 
 spark.stop()
+print("\n🎉 ÉTAPE 1 TERMINÉE AVEC SUCCÈS !")

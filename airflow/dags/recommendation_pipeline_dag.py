@@ -140,7 +140,7 @@ os.environ['PYSPARK_PYTHON'] = 'python3'
 os.environ['JAVA_TOOL_OPTIONS'] = ''
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json, hash, abs as spark_abs
+from pyspark.sql.functions import col, from_json
 from pyspark.sql.types import LongType, StructType, StructField, StringType, FloatType
 from pyspark.ml.recommendation import ALSModel
 
@@ -150,13 +150,13 @@ PROJECT_PATH = '/opt/airflow/project'
 print("Kafka broker : " + KAFKA_BROKER)
 print("Demarrage Spark...")
 
-spark = SparkSession.builder \
-    .appName("ALS-Streaming-Airflow") \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0") \
-    .config("spark.driver.extraJavaOptions", "-Djavax.security.auth.useSubjectCredsOnly=false") \
-    .config("spark.executor.extraJavaOptions", "-Djavax.security.auth.useSubjectCredsOnly=false") \
-    .config("spark.hadoop.fs.checksum.type", "NONE") \
-    .config("spark.hadoop.dfs.checksum.type", "NONE") \
+spark = SparkSession.builder \\
+    .appName("ALS-Streaming-Airflow") \\
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0") \\
+    .config("spark.driver.extraJavaOptions", "-Djavax.security.auth.useSubjectCredsOnly=false") \\
+    .config("spark.executor.extraJavaOptions", "-Djavax.security.auth.useSubjectCredsOnly=false") \\
+    .config("spark.hadoop.fs.checksum.type", "NONE") \\
+    .config("spark.hadoop.dfs.checksum.type", "NONE") \\
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
@@ -166,6 +166,13 @@ print("Chargement du modele ALS...")
 model = ALSModel.load(PROJECT_PATH + "/als_model/")
 print("Modele ALS charge !")
 
+# CHARGEMENT DU MAPPING (NOUVEAU)
+print("Chargement du mapping utilisateurs...")
+mapping_df = spark.read.parquet(PROJECT_PATH + "/data/user_mapping.parquet") \\
+    .select("UserId", "user_idx") \\
+    .distinct()
+print(f"Mapping charge : {mapping_df.count()} utilisateurs")
+
 schema = StructType([
     StructField("UserId",    StringType(), True),
     StructField("ProductId", StringType(), True),
@@ -174,16 +181,16 @@ schema = StructType([
 ])
 
 print("Connexion a Kafka : " + KAFKA_BROKER)
-kafka_df = spark.readStream \
-    .format("kafka") \
-    .option("kafka.bootstrap.servers", KAFKA_BROKER) \
-    .option("subscribe", "reviews_stream") \
-    .option("startingOffsets", "earliest") \
+kafka_df = spark.readStream \\
+    .format("kafka") \\
+    .option("kafka.bootstrap.servers", KAFKA_BROKER) \\
+    .option("subscribe", "reviews_stream") \\
+    .option("startingOffsets", "earliest") \\
     .load()
 
-parsed_df = kafka_df \
-    .selectExpr("CAST(value AS STRING) as json_str") \
-    .select(from_json(col("json_str"), schema).alias("data")) \
+parsed_df = kafka_df \\
+    .selectExpr("CAST(value AS STRING) as json_str") \\
+    .select(from_json(col("json_str"), schema).alias("data")) \\
     .select("data.*")
 
 def process_batch(batch_df, batch_id):
@@ -194,11 +201,14 @@ def process_batch(batch_df, batch_id):
 
     print("Batch " + str(batch_id) + " : " + str(count) + " messages recus")
 
-    batch_df = batch_df.withColumn(
-        "user_idx",
-        (spark_abs(hash(col("UserId"))) % 100000).cast("integer")
-    )
-    unique_users = batch_df.select("user_idx").distinct()
+    # NOUVEAU CODE : Jointure avec mapping au lieu du hash
+    batch_df_with_idx = batch_df.join(mapping_df, on="UserId", how="inner")
+    
+    if batch_df_with_idx.count() == 0:
+        print("  Aucun utilisateur trouve dans le mapping")
+        return
+    
+    unique_users = batch_df_with_idx.select("user_idx").distinct()
     nb = unique_users.count()
     print("  " + str(nb) + " utilisateurs -> generation recommandations...")
 
@@ -207,11 +217,11 @@ def process_batch(batch_df, batch_id):
     recs.write.mode("append").json(PROJECT_PATH + "/output/recommendations/")
     print("  Recommandations sauvegardees !")
 
-query = parsed_df.writeStream \
-    .foreachBatch(process_batch) \
-    .outputMode("append") \
-    .option("checkpointLocation", PROJECT_PATH + "/checkpoints/streaming/") \
-    .trigger(processingTime="10 seconds") \
+query = parsed_df.writeStream \\
+    .foreachBatch(process_batch) \\
+    .outputMode("append") \\
+    .option("checkpointLocation", PROJECT_PATH + "/checkpoints/streaming/") \\
+    .trigger(processingTime="10 seconds") \\
     .start()
 
 print("Streaming demarre — attente des messages Kafka...")

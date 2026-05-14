@@ -32,14 +32,13 @@ spark.sparkContext.setLogLevel("WARN")
 model = ALSModel.load("als_model/")
 print("✅ Modèle ALS chargé depuis als_model/")
 
-# ── 3. Charger le mapping UserId → user_idx ──────────────────────────
-# (créé par l'étape 1, contient la correspondance string → entier)
-# Le parquet ne contient que user_idx — on lit directement les user_idx uniques
-mapping = spark.read.parquet("data/cleaned_reviews.parquet") \
-    .select("user_idx") \
+# ── 3. Charger le mapping UserId → user_idx (CORRIGÉ) ─────────────────
+# Charge la correspondance complète UserId → user_idx
+print("Chargement du mapping utilisateurs...")
+mapping_df = spark.read.parquet("data/user_mapping.parquet") \
+    .select("UserId", "user_idx") \
     .distinct()
-print("✅ Mapping user_idx chargé")
-
+print(f"✅ Mapping chargé : {mapping_df.count()} utilisateurs")
 
 # ── 4. Définir le schéma des messages Kafka ──────────────────────────
 schema = StructType([
@@ -63,27 +62,23 @@ parsed_df = kafka_df \
     .select(from_json(col("json_str"), schema).alias("data")) \
     .select("data.*")
 
-# ── 7. Fonction appelée pour chaque micro-batch ──────────────────────
+# ── 7. Fonction appelée pour chaque micro-batch (CORRIGÉE) ───────────
 def process_batch(batch_df, batch_id):
     if batch_df.count() == 0:
         return
 
     print(f"\n--- Batch {batch_id} : {batch_df.count()} nouveaux avis ---")
 
-    # Joindre avec le mapping pour obtenir user_idx depuis UserId
-   # Convertir UserId string en entier directement
-    from pyspark.sql.functions import hash, abs as spark_abs
-    batch_df = batch_df.withColumn(
-        "user_idx", 
-        (spark_abs(hash(col("UserId"))) % 100000).cast("integer")
-    )
-    unique_users = batch_df.select("user_idx").distinct()
-
-    nb_users = unique_users.count()
-    if nb_users == 0:
-        print("  ⚠️  Aucun user connu dans ce batch")
+    # ✅ CORRECTION : Jointure avec le mapping au lieu du hash
+    batch_df_with_idx = batch_df.join(mapping_df, on="UserId", how="inner")
+    
+    if batch_df_with_idx.count() == 0:
+        print("  ⚠️ Aucun utilisateur trouvé dans le mapping")
         return
 
+    unique_users = batch_df_with_idx.select("user_idx").distinct()
+    nb_users = unique_users.count()
+    
     print(f"  👤 {nb_users} utilisateurs connus → génération des recommandations...")
 
     # Générer les Top-5 recommandations pour ces users
